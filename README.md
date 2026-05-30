@@ -8,10 +8,11 @@ Archivo principal:
 
 Contenido:
 
-- Diapositiva animada estilo Canva.
-- Paneles con tipos de lectura.
-- Imagen educativa generada para la presentación.
-- Diseño responsive para pantalla ancha y móvil.
+- Presentación interactiva estilo Canva.
+- Navegación por pestañas, botones anterior/siguiente y teclado.
+- Imágenes educativas por tema.
+- Subtemas organizados en tarjetas.
+- Diseño responsive para pantalla ancha, tablet y móvil.
 
 Para publicarlo en GitHub Pages:
 
