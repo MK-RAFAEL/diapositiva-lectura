@@ -7,9 +7,9 @@
   <style>
     :root {
       --ink: #17213a;
-      --deep: #24304d;
+      --deep: #27334f;
       --paper: #fff7e8;
-      --white: rgba(255, 255, 255, 0.84);
+      --muted: #536079;
       --mint: #47d7ac;
       --coral: #ff6f61;
       --gold: #ffc857;
@@ -17,6 +17,8 @@
       --sky: #45b7d1;
       --rose: #ff90b3;
       --lime: #a8df65;
+      --white: rgba(255, 255, 255, 0.84);
+      --line: rgba(23, 33, 58, 0.12);
       --shadow: rgba(23, 33, 58, 0.22);
     }
 
@@ -32,30 +34,102 @@
       display: grid;
       place-items: center;
       background:
-        radial-gradient(circle at 8% 14%, rgba(255, 200, 87, 0.34), transparent 24%),
+        radial-gradient(circle at 9% 12%, rgba(255, 200, 87, 0.34), transparent 24%),
         radial-gradient(circle at 92% 16%, rgba(71, 215, 172, 0.28), transparent 25%),
-        radial-gradient(circle at 85% 88%, rgba(255, 111, 97, 0.25), transparent 25%),
+        radial-gradient(circle at 82% 88%, rgba(255, 111, 97, 0.25), transparent 25%),
         linear-gradient(135deg, #fff4d7 0%, #cfefe7 45%, #f9d2cb 100%);
       color: var(--ink);
       font-family: "Trebuchet MS", "Segoe UI", Arial, sans-serif;
       overflow: auto;
     }
 
-    .slide {
+    .deck {
+      width: min(100%, 1480px);
+      display: grid;
+      gap: 12px;
+    }
+
+    .tabs {
       position: relative;
-      width: min(100%, 1480px, calc((100svh - clamp(20px, 3.2vw, 44px)) * 16 / 9));
+      z-index: 3;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 8px;
+      padding: 8px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 2px solid rgba(255, 255, 255, 0.64);
+      box-shadow: 0 18px 40px rgba(23, 33, 58, 0.13);
+      backdrop-filter: blur(10px);
+    }
+
+    .tab {
+      min-width: 0;
+      min-height: 50px;
+      border: 0;
+      border-radius: 15px;
+      padding: 8px 10px;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 8px;
+      align-items: center;
+      background: transparent;
+      color: var(--deep);
+      font: inherit;
+      font-weight: 900;
+      text-align: left;
+      cursor: pointer;
+      transition: transform 180ms ease, background 180ms ease, box-shadow 180ms ease;
+    }
+
+    .tab:hover {
+      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.62);
+    }
+
+    .tab[aria-selected="true"] {
+      background: var(--ink);
+      color: var(--paper);
+      box-shadow: 0 12px 24px rgba(23, 33, 58, 0.22);
+    }
+
+    .tab-number {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--tone, var(--mint)) 36%, white);
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .tab-text {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: clamp(12px, 0.92vw, 15px);
+    }
+
+    .stage {
+      position: relative;
+      width: min(100%, calc((100svh - 110px) * 16 / 9));
+      min-width: 0;
+      justify-self: center;
       aspect-ratio: 16 / 9;
       min-height: 0;
       overflow: hidden;
       border-radius: 28px;
       background:
-        linear-gradient(120deg, rgba(255, 255, 255, 0.94), rgba(255, 247, 232, 0.88)),
+        linear-gradient(120deg, rgba(255, 255, 255, 0.95), rgba(255, 247, 232, 0.88)),
         repeating-linear-gradient(90deg, rgba(23, 33, 58, 0.035) 0 1px, transparent 1px 74px);
       box-shadow: 0 30px 82px rgba(23, 33, 58, 0.28);
       isolation: isolate;
     }
 
-    .slide::before {
+    .stage::before {
       content: "";
       position: absolute;
       inset: -90px;
@@ -66,73 +140,46 @@
       z-index: -2;
     }
 
-    .slide::after {
+    .stage::after {
       content: "";
       position: absolute;
       inset: 22px;
       border: 2px solid rgba(23, 33, 58, 0.11);
       border-radius: 22px;
       pointer-events: none;
-      z-index: 5;
+      z-index: 4;
     }
 
-    .bubble {
+    .slide-page {
       position: absolute;
-      border-radius: 999px;
-      filter: drop-shadow(0 14px 24px rgba(23, 33, 58, 0.14));
-      opacity: 0.9;
-      z-index: 0;
-    }
-
-    .bubble.one {
-      width: 128px;
-      height: 128px;
-      left: 42px;
-      bottom: 46px;
-      background: linear-gradient(135deg, var(--coral), var(--gold));
-      animation: drift 9s ease-in-out infinite;
-    }
-
-    .bubble.two {
-      width: 86px;
-      height: 86px;
-      right: 76px;
-      top: 54px;
-      background: linear-gradient(135deg, var(--mint), var(--sky));
-      animation: drift 8s ease-in-out infinite reverse;
-    }
-
-    .bubble.three {
-      width: 62px;
-      height: 62px;
-      left: 47%;
-      top: 34px;
-      background: linear-gradient(135deg, var(--violet), var(--rose));
-      animation: pulse-dot 5s ease-in-out infinite;
-    }
-
-    .content {
-      position: relative;
-      z-index: 2;
-      height: 100%;
-      padding: clamp(24px, 2.9vw, 52px);
+      inset: 0;
       display: grid;
-      grid-template-columns: 0.84fr 0.84fr 1.16fr;
-      gap: clamp(14px, 1.8vw, 32px);
-      align-items: stretch;
+      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.08fr);
+      gap: clamp(18px, 2vw, 32px);
+      padding: clamp(30px, 3.3vw, 56px);
+      opacity: 0;
+      transform: translateX(30px) scale(0.985);
+      pointer-events: none;
+      transition: opacity 420ms ease, transform 420ms ease;
     }
 
-    .intro,
-    .visual-panel,
-    .reading-map {
+    .slide-page.active {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+      pointer-events: auto;
+    }
+
+    .slide-copy,
+    .visual {
       min-width: 0;
+      align-self: stretch;
     }
 
-    .intro {
+    .slide-copy {
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      gap: 18px;
+      justify-content: center;
+      gap: clamp(14px, 1.4vw, 22px);
     }
 
     .kicker {
@@ -140,23 +187,26 @@
       padding: 8px 13px;
       border: 2px solid rgba(23, 33, 58, 0.14);
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.72);
+      background: rgba(255, 255, 255, 0.76);
       color: #31545c;
       font-size: clamp(12px, 0.82vw, 15px);
       font-weight: 900;
       text-transform: uppercase;
       letter-spacing: 0;
-      animation: reveal 700ms ease-out both;
     }
 
-    h1 {
-      margin: 18px 0 14px;
-      max-width: 500px;
-      font-size: clamp(45px, 4.7vw, 80px);
+    h1,
+    h2 {
+      margin: 0;
+      max-width: 760px;
+      font-size: clamp(44px, 4.7vw, 82px);
       line-height: 0.93;
       letter-spacing: 0;
       text-wrap: balance;
-      animation: reveal 900ms 120ms ease-out both;
+    }
+
+    h2 {
+      font-size: clamp(36px, 4vw, 68px);
     }
 
     .gradient-word {
@@ -170,103 +220,88 @@
 
     .lead {
       margin: 0;
-      max-width: 490px;
-      font-size: clamp(17px, 1.3vw, 23px);
+      max-width: 720px;
+      color: #33445b;
+      font-size: clamp(17px, 1.35vw, 24px);
       line-height: 1.28;
       font-weight: 800;
-      color: #33445b;
       text-wrap: balance;
-      animation: reveal 900ms 260ms ease-out both;
     }
 
-    .key-box {
-      padding: 17px;
-      border-radius: 18px;
-      background: rgba(23, 33, 58, 0.92);
-      color: var(--paper);
-      box-shadow: 0 16px 32px rgba(23, 33, 58, 0.2);
-      animation: reveal 850ms 460ms ease-out both;
-    }
-
-    .key-box h2 {
-      margin: 0 0 10px;
-      font-size: clamp(18px, 1.45vw, 25px);
-      letter-spacing: 0;
-    }
-
-    .key-box p {
-      margin: 0;
-      color: rgba(255, 247, 232, 0.9);
-      font-size: clamp(13px, 0.92vw, 16px);
-      line-height: 1.36;
-      font-weight: 700;
-    }
-
-    .strategy {
+    .chips,
+    .mini-grid,
+    .topic-grid,
+    .subtopic-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 9px;
-      animation: reveal 850ms 620ms ease-out both;
+      gap: 10px;
     }
 
-    .step {
-      min-height: 94px;
-      padding: 12px 11px;
-      border-radius: 15px;
-      background: rgba(255, 255, 255, 0.78);
-      border: 2px solid rgba(23, 33, 58, 0.1);
+    .chips {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .chip,
+    .point,
+    .subtopic,
+    .activity-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 16px;
+      border: 2px solid var(--line);
+      background: var(--white);
       box-shadow: 0 14px 26px rgba(23, 33, 58, 0.1);
     }
 
-    .step strong {
-      display: block;
-      margin-bottom: 7px;
+    .chip {
+      padding: 11px 12px;
       color: var(--deep);
-      font-size: clamp(13px, 0.95vw, 16px);
+      font-size: clamp(12px, 0.86vw, 15px);
+      font-weight: 900;
     }
 
-    .step span {
-      display: block;
-      color: #49546b;
-      font-size: clamp(11px, 0.78vw, 13px);
-      line-height: 1.25;
-      font-weight: 700;
+    .chip::before,
+    .point::before,
+    .subtopic::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 6px;
+      background: linear-gradient(180deg, var(--tone, var(--mint)), transparent);
     }
 
-    .visual-panel {
-      position: relative;
+    .visual {
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
+      justify-content: center;
       gap: 14px;
-      padding: 16px;
+    }
+
+    .image-card {
+      position: relative;
+      min-height: 0;
       border-radius: 24px;
+      padding: 14px;
       background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(255, 247, 232, 0.66)),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(255, 247, 232, 0.66)),
         radial-gradient(circle at 50% 20%, rgba(255, 200, 87, 0.22), transparent 35%);
       border: 2px solid rgba(23, 33, 58, 0.1);
       box-shadow: 0 22px 38px rgba(23, 33, 58, 0.13);
-      overflow: hidden;
-      animation: reveal 900ms 300ms ease-out both;
     }
 
-    .visual-panel::before {
+    .image-card::before {
       content: "";
       position: absolute;
-      inset: 14px;
+      inset: 13px;
       border: 2px dashed rgba(23, 33, 58, 0.12);
       border-radius: 18px;
       pointer-events: none;
     }
 
-    .main-image {
+    .slide-image {
       position: relative;
       z-index: 1;
       width: 100%;
-      height: auto;
       aspect-ratio: 16 / 9;
-      min-height: 0;
-      max-height: clamp(210px, 26vw, 390px);
       object-fit: cover;
       border-radius: 18px;
       border: 3px solid rgba(255, 255, 255, 0.72);
@@ -274,179 +309,191 @@
       animation: float-image 5s ease-in-out infinite;
     }
 
-    .visual-notes {
-      position: relative;
-      z-index: 1;
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-    }
-
-    .note {
-      padding: 13px;
-      border-radius: 15px;
-      background: rgba(255, 255, 255, 0.82);
-      border: 2px solid rgba(23, 33, 58, 0.09);
-      box-shadow: 0 13px 24px rgba(23, 33, 58, 0.1);
-    }
-
-    .note strong {
-      display: block;
-      margin-bottom: 5px;
-      font-size: clamp(13px, 0.9vw, 15px);
-      color: var(--deep);
-    }
-
-    .note span {
-      display: block;
-      color: #4f5b70;
-      font-size: clamp(11px, 0.78vw, 13px);
-      line-height: 1.25;
-      font-weight: 700;
-    }
-
-    .reading-map {
-      display: grid;
+    .mini-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: clamp(10px, 0.9vw, 14px);
-      align-content: center;
     }
 
-    .type-card {
-      position: relative;
-      min-height: 122px;
-      padding: 13px 13px 12px;
-      border-radius: 17px;
-      background: var(--white);
-      border: 2px solid rgba(23, 33, 58, 0.1);
-      box-shadow: 0 15px 26px rgba(23, 33, 58, 0.1);
-      overflow: hidden;
-      animation: card-in 650ms ease-out both;
+    .point {
+      padding: 13px 13px 13px 16px;
     }
 
-    .type-card:nth-child(1) { --tone: var(--mint); animation-delay: 120ms; }
-    .type-card:nth-child(2) { --tone: var(--gold); animation-delay: 190ms; }
-    .type-card:nth-child(3) { --tone: var(--coral); animation-delay: 260ms; }
-    .type-card:nth-child(4) { --tone: var(--violet); animation-delay: 330ms; }
-    .type-card:nth-child(5) { --tone: var(--sky); animation-delay: 400ms; }
-    .type-card:nth-child(6) { --tone: var(--rose); animation-delay: 470ms; }
-    .type-card:nth-child(7) { --tone: var(--lime); animation-delay: 540ms; }
-    .type-card:nth-child(8) { --tone: #ff9f43; animation-delay: 610ms; }
-
-    .type-card::before {
-      content: "";
-      position: absolute;
-      inset: 0 auto 0 0;
-      width: 7px;
-      background: linear-gradient(180deg, var(--tone), transparent);
+    .point strong,
+    .subtopic strong,
+    .activity-card strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--deep);
+      font-size: clamp(14px, 0.96vw, 17px);
+      line-height: 1.08;
     }
 
-    .type-card::after {
-      content: "";
-      position: absolute;
-      right: -34px;
-      bottom: -38px;
-      width: 104px;
-      height: 104px;
-      border-radius: 50%;
-      background: color-mix(in srgb, var(--tone) 28%, transparent);
-    }
-
-    .badge {
-      position: relative;
-      width: 38px;
-      height: 38px;
-      display: grid;
-      place-items: center;
-      margin-bottom: 8px;
-      border-radius: 13px;
-      background: color-mix(in srgb, var(--tone) 28%, white);
-      border: 2px solid color-mix(in srgb, var(--tone) 58%, white);
-      color: var(--ink);
-    }
-
-    .badge svg {
-      width: 22px;
-      height: 22px;
-      stroke: currentColor;
-      stroke-width: 2.25;
-      fill: none;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    .type-card h3 {
-      position: relative;
-      margin: 0 0 5px;
-      font-size: clamp(16px, 1.12vw, 20px);
-      line-height: 1.05;
-      letter-spacing: 0;
-    }
-
-    .type-card p {
-      position: relative;
-      margin: 0;
-      color: #3f4b60;
-      font-size: clamp(11px, 0.78vw, 13px);
+    .point span,
+    .subtopic span,
+    .activity-card span {
+      display: block;
+      color: var(--muted);
+      font-size: clamp(12px, 0.82vw, 14px);
       line-height: 1.25;
       font-weight: 700;
     }
 
-    .chip {
-      position: relative;
+    .topic-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .subtopic-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .subtopic {
+      min-height: 118px;
+      padding: 15px 14px 13px 18px;
+    }
+
+    .subtopic .tag {
       display: inline-block;
-      margin-top: 8px;
+      margin-top: 9px;
       padding: 5px 8px;
       border-radius: 999px;
-      background: color-mix(in srgb, var(--tone) 18%, white);
-      color: #24304d;
+      background: color-mix(in srgb, var(--tone, var(--mint)) 18%, white);
+      color: var(--deep);
       font-size: clamp(10px, 0.68vw, 12px);
       font-weight: 900;
     }
 
-    .closing {
-      position: absolute;
-      left: clamp(28px, 3.2vw, 52px);
-      right: clamp(28px, 3.2vw, 52px);
-      bottom: clamp(18px, 1.7vw, 28px);
-      display: flex;
-      justify-content: flex-end;
-      pointer-events: none;
-      z-index: 4;
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 11px;
     }
 
-    .closing span {
-      max-width: 560px;
-      padding: 10px 15px;
+    .step {
+      position: relative;
+      min-height: 160px;
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.82);
+      border: 2px solid var(--line);
+      box-shadow: 0 16px 28px rgba(23, 33, 58, 0.1);
+    }
+
+    .step-number {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 12px;
       border-radius: 999px;
-      background: rgba(23, 33, 58, 0.92);
-      color: var(--paper);
-      font-size: clamp(12px, 0.85vw, 15px);
+      background: color-mix(in srgb, var(--tone, var(--mint)) 38%, white);
       font-weight: 900;
-      box-shadow: 0 16px 28px rgba(23, 33, 58, 0.24);
-      animation: reveal 900ms 880ms ease-out both;
+      color: var(--ink);
     }
 
-    @keyframes reveal {
-      from {
-        opacity: 0;
-        transform: translateY(18px) scale(0.98);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
+    .step h3 {
+      margin: 0 0 8px;
+      color: var(--deep);
+      font-size: clamp(18px, 1.45vw, 24px);
+      line-height: 1.04;
     }
 
-    @keyframes card-in {
-      from {
-        opacity: 0;
-        transform: translateY(22px) rotate(1deg);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0) rotate(0);
-      }
+    .step p {
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(12px, 0.86vw, 15px);
+      line-height: 1.28;
+      font-weight: 700;
+    }
+
+    .activity {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 11px;
+    }
+
+    .activity-card {
+      min-height: 128px;
+      padding: 16px;
+    }
+
+    .quote {
+      padding: 16px 18px;
+      border-radius: 20px;
+      background: rgba(23, 33, 58, 0.93);
+      color: var(--paper);
+      box-shadow: 0 16px 28px rgba(23, 33, 58, 0.22);
+      font-size: clamp(15px, 1.16vw, 20px);
+      line-height: 1.28;
+      font-weight: 900;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 6px 2px 0;
+    }
+
+    .nav-btn {
+      min-height: 44px;
+      border: 0;
+      border-radius: 999px;
+      padding: 0 18px;
+      background: var(--ink);
+      color: var(--paper);
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 14px 26px rgba(23, 33, 58, 0.18);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.46;
+      cursor: not-allowed;
+    }
+
+    .progress {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.58);
+      border: 1px solid rgba(23, 33, 58, 0.1);
+      overflow: hidden;
+    }
+
+    .progress span {
+      display: block;
+      width: 16.666%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--coral), var(--gold), var(--mint), var(--sky));
+      transition: width 260ms ease;
+    }
+
+    .bubble {
+      position: absolute;
+      border-radius: 999px;
+      filter: drop-shadow(0 14px 24px rgba(23, 33, 58, 0.14));
+      opacity: 0.88;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .bubble.one {
+      width: 118px;
+      height: 118px;
+      left: 42px;
+      bottom: 38px;
+      background: linear-gradient(135deg, var(--coral), var(--gold));
+      animation: drift 9s ease-in-out infinite;
+    }
+
+    .bubble.two {
+      width: 84px;
+      height: 84px;
+      right: 76px;
+      top: 50px;
+      background: linear-gradient(135deg, var(--mint), var(--sky));
+      animation: drift 8s ease-in-out infinite reverse;
     }
 
     @keyframes aura {
@@ -467,113 +514,84 @@
       }
     }
 
-    @keyframes pulse-dot {
-      0%, 100% {
-        transform: scale(1);
-        opacity: 0.72;
-      }
-      50% {
-        transform: scale(1.18);
-        opacity: 1;
-      }
-    }
-
     @keyframes float-image {
       0%, 100% {
         transform: translateY(0) rotate(-0.5deg);
       }
       50% {
-        transform: translateY(-10px) rotate(0.5deg);
+        transform: translateY(-9px) rotate(0.5deg);
       }
     }
 
     @media (max-width: 1180px) {
       body {
         place-items: start center;
-        padding: clamp(12px, 2.4vw, 22px);
       }
 
-      .slide {
+      .tabs {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .stage {
         width: min(100%, 1040px);
         aspect-ratio: auto;
         min-height: 0;
         overflow: hidden;
       }
 
-      .content {
-        height: auto;
+      .slide-page {
+        position: relative;
+        display: none;
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-        grid-template-areas:
-          "intro visual"
-          "map map";
         padding: clamp(24px, 4vw, 42px);
-        padding-bottom: clamp(18px, 3vw, 30px);
-        gap: clamp(16px, 2.4vw, 28px);
       }
 
-      .intro {
-        grid-area: intro;
-        justify-content: start;
+      .slide-page.active {
+        display: grid;
       }
 
-      .visual-panel {
-        grid-area: visual;
-        min-height: auto;
+      .topic-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
-      .main-image {
-        max-height: 330px;
-      }
-
-      .reading-map {
-        grid-area: map;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-      }
-
-      .type-card {
-        min-height: 136px;
-      }
-
-      .closing {
-        position: static;
-        margin: 0 clamp(24px, 4vw, 42px) clamp(22px, 3vw, 34px);
-        justify-content: center;
+      .timeline,
+      .activity {
+        grid-template-columns: 1fr;
       }
     }
 
-    @media (max-width: 840px) {
-      .slide {
-        width: 100%;
+    @media (max-width: 820px) {
+      .deck {
+        gap: 10px;
+      }
+
+      .tabs {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .stage {
         border-radius: 22px;
       }
 
-      .slide::after {
+      .stage::after {
         inset: 14px;
         border-radius: 18px;
       }
 
-      .content {
+      .slide-page {
         grid-template-columns: 1fr;
-        grid-template-areas:
-          "intro"
-          "visual"
-          "map";
         padding: clamp(22px, 5vw, 34px);
-        gap: 18px;
       }
 
-      .strategy,
-      .visual-notes,
-      .reading-map {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+      .chips,
+      .mini-grid,
+      .subtopic-grid,
+      .topic-grid {
+        grid-template-columns: 1fr;
       }
 
-      .main-image {
-        max-height: 360px;
-      }
-
-      .type-card {
-        min-height: 126px;
+      .slide-copy {
+        justify-content: start;
       }
     }
 
@@ -582,199 +600,345 @@
         padding: 8px;
       }
 
-      .slide {
+      .tabs {
+        display: flex;
+        overflow-x: auto;
+        scrollbar-width: thin;
+        border-radius: 18px;
+      }
+
+      .tab {
+        min-width: 154px;
+      }
+
+      .stage {
         border-radius: 20px;
       }
 
-      .content {
-        padding: 24px 18px 18px;
+      .slide-page {
+        padding: 24px 18px;
       }
 
-      .strategy,
-      .visual-notes,
-      .reading-map {
+      h1 {
+        font-size: clamp(40px, 12vw, 56px);
+      }
+
+      h2 {
+        font-size: clamp(34px, 10vw, 48px);
+      }
+
+      .controls {
         grid-template-columns: 1fr;
       }
 
-      .visual-panel {
-        min-height: auto;
-      }
-
-      .main-image {
-        max-height: none;
-      }
-
-      .closing {
-        margin: 0 18px 22px;
-        justify-content: center;
-      }
-
-      .closing span {
-        border-radius: 18px;
-        text-align: center;
-      }
-    }
-
-    @media (max-width: 380px) {
-      h1 {
-        font-size: clamp(38px, 13vw, 48px);
-      }
-
-      .content {
-        padding-inline: 14px;
-      }
-
-      .type-card,
-      .note,
-      .step,
-      .key-box {
-        border-radius: 14px;
+      .nav-btn {
+        width: 100%;
       }
     }
   </style>
 </head>
 <body>
-  <main class="slide" aria-label="Diapositiva sobre la lectura y los tipos de lectura">
-    <div class="bubble one"></div>
-    <div class="bubble two"></div>
-    <div class="bubble three"></div>
+  <main class="deck" aria-label="Presentación interactiva sobre la lectura">
+    <nav class="tabs" role="tablist" aria-label="Pestañas de la presentación">
+      <button class="tab" role="tab" aria-selected="true" aria-controls="slide-1" id="tab-1" style="--tone: var(--coral)">
+        <span class="tab-number">1</span><span class="tab-text">Portada</span>
+      </button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="slide-2" id="tab-2" style="--tone: var(--mint)">
+        <span class="tab-number">2</span><span class="tab-text">Comprensión</span>
+      </button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="slide-3" id="tab-3" style="--tone: var(--gold)">
+        <span class="tab-number">3</span><span class="tab-text">Propósitos</span>
+      </button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="slide-4" id="tab-4" style="--tone: var(--sky)">
+        <span class="tab-number">4</span><span class="tab-text">Lectura digital</span>
+      </button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="slide-5" id="tab-5" style="--tone: var(--violet)">
+        <span class="tab-number">5</span><span class="tab-text">Estrategias</span>
+      </button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="slide-6" id="tab-6" style="--tone: var(--rose)">
+        <span class="tab-number">6</span><span class="tab-text">Actividad</span>
+      </button>
+    </nav>
 
-    <section class="content">
-      <div class="intro">
-        <div>
+    <section class="stage">
+      <div class="bubble one"></div>
+      <div class="bubble two"></div>
+
+      <article class="slide-page active" id="slide-1" role="tabpanel" aria-labelledby="tab-1">
+        <div class="slide-copy">
           <div class="kicker">Lenguaje y comunicación</div>
           <h1>
             La lectura
             <span class="gradient-word">y sus tipos</span>
           </h1>
           <p class="lead">
-            Leer es comprender, imaginar, analizar y convertir la información en pensamiento propio.
+            Una presentación interactiva para entender cómo leemos, para qué leemos y qué habilidades usamos en cada tipo de lectura.
           </p>
+          <div class="chips">
+            <span class="chip" style="--tone: var(--mint)">Comprender información</span>
+            <span class="chip" style="--tone: var(--gold)">Inferir significados</span>
+            <span class="chip" style="--tone: var(--coral)">Pensar críticamente</span>
+            <span class="chip" style="--tone: var(--sky)">Aprender y disfrutar</span>
+          </div>
         </div>
+        <div class="visual">
+          <div class="image-card">
+            <img class="slide-image" src="assets/lectura-ilustracion.png" alt="Ilustración de un libro abierto con ideas y conocimiento" />
+          </div>
+          <div class="quote">Leer es transformar palabras en ideas, preguntas, imágenes y decisiones.</div>
+        </div>
+      </article>
 
-        <div class="key-box">
-          <h2>Idea central</h2>
-          <p>
-            La lectura no se trata solo de pasar la vista por palabras: cada tipo de lectura activa una habilidad distinta para entender mejor un texto.
+      <article class="slide-page" id="slide-2" role="tabpanel" aria-labelledby="tab-2">
+        <div class="slide-copy">
+          <div class="kicker">Tema 1</div>
+          <h2>
+            Lectura por
+            <span class="gradient-word">comprensión</span>
+          </h2>
+          <p class="lead">
+            Estos tipos explican la profundidad con la que entendemos un texto: desde lo que dice claramente hasta lo que podemos cuestionar.
           </p>
-        </div>
-
-        <div class="strategy" aria-label="Estrategias de lectura">
-          <div class="step">
-            <strong>Antes</strong>
-            <span>Observa título, imágenes y palabras clave para anticipar el tema.</span>
-          </div>
-          <div class="step">
-            <strong>Durante</strong>
-            <span>Subraya ideas importantes, pregunta y conecta con lo que sabes.</span>
-          </div>
-          <div class="step">
-            <strong>Después</strong>
-            <span>Resume, opina y explica con tus palabras lo comprendido.</span>
-          </div>
-        </div>
-      </div>
-
-      <aside class="visual-panel" aria-label="Imagen y beneficios de la lectura">
-        <img class="main-image" src="assets/lectura-ilustracion.png" alt="Ilustración educativa de un libro abierto con ideas y conocimiento" />
-        <div class="visual-notes">
-          <div class="note">
-            <strong>Comprender</strong>
-            <span>Identificar ideas principales, detalles y relaciones.</span>
-          </div>
-          <div class="note">
-            <strong>Imaginar</strong>
-            <span>Crear escenas mentales y conectar con emociones.</span>
-          </div>
-          <div class="note">
-            <strong>Analizar</strong>
-            <span>Comparar, cuestionar y evaluar información.</span>
-          </div>
-          <div class="note">
-            <strong>Aprender</strong>
-            <span>Organizar conocimientos para recordarlos mejor.</span>
+          <div class="subtopic-grid">
+            <div class="subtopic" style="--tone: var(--mint)">
+              <strong>Literal</strong>
+              <span>Reconoce datos, hechos, personajes, lugares e ideas explícitas.</span>
+              <span class="tag">Pregunta: ¿qué dice?</span>
+            </div>
+            <div class="subtopic" style="--tone: var(--gold)">
+              <strong>Inferencial</strong>
+              <span>Deduce causas, consecuencias, emociones e intenciones usando pistas.</span>
+              <span class="tag">Pregunta: ¿qué se entiende?</span>
+            </div>
+            <div class="subtopic" style="--tone: var(--coral)">
+              <strong>Crítica</strong>
+              <span>Evalúa argumentos, confiabilidad, postura del autor y calidad de la información.</span>
+              <span class="tag">Pregunta: ¿es válido?</span>
+            </div>
+            <div class="subtopic" style="--tone: var(--violet)">
+              <strong>Apreciativa</strong>
+              <span>Valora el estilo, las emociones, la belleza del lenguaje y el impacto personal.</span>
+              <span class="tag">Pregunta: ¿qué me provoca?</span>
+            </div>
           </div>
         </div>
-      </aside>
-
-      <section class="reading-map" aria-label="Paneles de tipos de lectura">
-        <article class="type-card">
-          <div class="badge" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M4 5h16"/><path d="M4 10h16"/><path d="M4 15h9"/><path d="M4 20h7"/></svg>
+        <div class="visual">
+          <div class="image-card">
+            <img class="slide-image" src="assets/slide-comprension.png" alt="Ilustración sobre niveles de comprensión lectora" />
           </div>
-          <h3>Literal</h3>
-          <p>Encuentra información explícita: datos, lugares, personajes y acciones.</p>
-          <span class="chip">Pregunta: ¿qué dice?</span>
-        </article>
-
-        <article class="type-card">
-          <div class="badge" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M12 3v3"/><path d="M5.6 5.6l2.1 2.1"/><path d="M18.4 5.6l-2.1 2.1"/><path d="M8 14a4 4 0 1 1 8 0c0 1.4-.8 2.3-1.7 3.1-.7.6-1.1 1.1-1.1 1.9h-2.4c0-.8-.4-1.3-1.1-1.9C8.8 16.3 8 15.4 8 14z"/><path d="M10 22h4"/></svg>
+          <div class="mini-grid">
+            <div class="point" style="--tone: var(--mint)"><strong>Explícito</strong><span>Información visible en el texto.</span></div>
+            <div class="point" style="--tone: var(--gold)"><strong>Implícito</strong><span>Ideas que se descubren con pistas.</span></div>
           </div>
-          <h3>Inferencial</h3>
-          <p>Deduce significados usando pistas, contexto y conocimiento previo.</p>
-          <span class="chip">Pregunta: ¿qué se entiende?</span>
-        </article>
+        </div>
+      </article>
 
-        <article class="type-card">
-          <div class="badge" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M9 11l2 2 4-5"/><path d="M12 3l7 4v5c0 4.5-2.8 7.6-7 9-4.2-1.4-7-4.5-7-9V7l7-4z"/></svg>
+      <article class="slide-page" id="slide-3" role="tabpanel" aria-labelledby="tab-3">
+        <div class="slide-copy">
+          <div class="kicker">Tema 2</div>
+          <h2>
+            Lectura según
+            <span class="gradient-word">el propósito</span>
+          </h2>
+          <p class="lead">
+            No siempre leemos por la misma razón. El objetivo cambia la velocidad, la atención y la estrategia.
+          </p>
+          <div class="topic-grid">
+            <div class="subtopic" style="--tone: var(--rose)">
+              <strong>Recreativa</strong>
+              <span>Busca disfrutar, imaginar y conectar con historias o poemas.</span>
+            </div>
+            <div class="subtopic" style="--tone: var(--sky)">
+              <strong>De estudio</strong>
+              <span>Organiza ideas para aprender: subrayar, resumir, esquematizar.</span>
+            </div>
+            <div class="subtopic" style="--tone: var(--lime)">
+              <strong>Exploratoria</strong>
+              <span>Revisa títulos, subtítulos e imágenes para ubicar información.</span>
+            </div>
+            <div class="subtopic" style="--tone: var(--gold)">
+              <strong>Selectiva</strong>
+              <span>Busca datos puntuales como fechas, nombres, definiciones o cifras.</span>
+            </div>
+            <div class="subtopic" style="--tone: var(--coral)">
+              <strong>Informativa</strong>
+              <span>Sirve para conocer hechos, noticias, instrucciones o explicaciones.</span>
+            </div>
+            <div class="subtopic" style="--tone: var(--violet)">
+              <strong>Investigativa</strong>
+              <span>Compara fuentes y reúne información para responder una pregunta.</span>
+            </div>
           </div>
-          <h3>Crítica</h3>
-          <p>Evalúa argumentos, intención del autor, fuentes y confiabilidad.</p>
-          <span class="chip">Pregunta: ¿es válido?</span>
-        </article>
+        </div>
+        <div class="visual">
+          <div class="image-card">
+            <img class="slide-image" src="assets/slide-propositos.png" alt="Ilustración sobre distintos propósitos de lectura" />
+          </div>
+          <div class="quote">Elegir el tipo de lectura correcto ayuda a leer mejor y perder menos tiempo.</div>
+        </div>
+      </article>
 
-        <article class="type-card">
-          <div class="badge" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/></svg>
+      <article class="slide-page" id="slide-4" role="tabpanel" aria-labelledby="tab-4">
+        <div class="slide-copy">
+          <div class="kicker">Tema 3</div>
+          <h2>
+            Lectura
+            <span class="gradient-word">digital</span>
+          </h2>
+          <p class="lead">
+            En pantalla leemos textos, enlaces, imágenes, videos y datos. La clave es comprender sin perder criterio.
+          </p>
+          <div class="subtopic-grid">
+            <div class="subtopic" style="--tone: var(--sky)">
+              <strong>Hipertextual</strong>
+              <span>Usa enlaces para conectar ideas y ampliar información.</span>
+              <span class="tag">Cuidado: no distraerse</span>
+            </div>
+            <div class="subtopic" style="--tone: var(--mint)">
+              <strong>Multimodal</strong>
+              <span>Combina texto, imagen, audio, video, gráficos y botones.</span>
+              <span class="tag">Leer también es interpretar</span>
+            </div>
+            <div class="subtopic" style="--tone: var(--gold)">
+              <strong>Verificación</strong>
+              <span>Compara autor, fecha, fuente, evidencia y propósito del contenido.</span>
+              <span class="tag">Pregunta: ¿es confiable?</span>
+            </div>
+            <div class="subtopic" style="--tone: var(--violet)">
+              <strong>Concentración</strong>
+              <span>Evita saltar sin objetivo y toma notas para mantener el hilo.</span>
+              <span class="tag">Leer con intención</span>
+            </div>
           </div>
-          <h3>Recreativa</h3>
-          <p>Busca disfrutar, imaginar y vivir emociones a través del texto.</p>
-          <span class="chip">Ejemplo: cuentos o novelas</span>
-        </article>
+        </div>
+        <div class="visual">
+          <div class="image-card">
+            <img class="slide-image" src="assets/slide-digital.png" alt="Ilustración sobre lectura digital y verificación de fuentes" />
+          </div>
+          <div class="mini-grid">
+            <div class="point" style="--tone: var(--sky)"><strong>Evalúa</strong><span>Quién publica y para qué.</span></div>
+            <div class="point" style="--tone: var(--mint)"><strong>Contrasta</strong><span>Revisa más de una fuente.</span></div>
+          </div>
+        </div>
+      </article>
 
-        <article class="type-card">
-          <div class="badge" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 3H20v18H6.5A2.5 2.5 0 0 1 4 18.5v-13A2.5 2.5 0 0 1 6.5 3z"/><path d="M8 7h8"/><path d="M8 11h6"/></svg>
+      <article class="slide-page" id="slide-5" role="tabpanel" aria-labelledby="tab-5">
+        <div class="slide-copy">
+          <div class="kicker">Tema 4</div>
+          <h2>
+            Estrategias para
+            <span class="gradient-word">leer mejor</span>
+          </h2>
+          <p class="lead">
+            Una buena lectura tiene etapas. Cada etapa ayuda a comprender, recordar y explicar mejor.
+          </p>
+          <div class="timeline">
+            <div class="step" style="--tone: var(--gold)">
+              <div class="step-number">1</div>
+              <h3>Antes</h3>
+              <p>Observa título, imágenes y palabras clave. Predice de qué tratará el texto.</p>
+            </div>
+            <div class="step" style="--tone: var(--mint)">
+              <div class="step-number">2</div>
+              <h3>Durante</h3>
+              <p>Subraya, pregunta, conecta ideas y marca lo que no entiendas.</p>
+            </div>
+            <div class="step" style="--tone: var(--coral)">
+              <div class="step-number">3</div>
+              <h3>Después</h3>
+              <p>Resume, opina, compara y explica con tus propias palabras.</p>
+            </div>
           </div>
-          <h3>De estudio</h3>
-          <p>Organiza ideas mediante subrayado, esquemas, resumen y repaso.</p>
-          <span class="chip">Objetivo: aprender</span>
-        </article>
+        </div>
+        <div class="visual">
+          <div class="image-card">
+            <img class="slide-image" src="assets/slide-estrategias.png" alt="Ilustración sobre estrategias antes durante y después de leer" />
+          </div>
+          <div class="quote">Comprender no es memorizar: es construir sentido.</div>
+        </div>
+      </article>
 
-        <article class="type-card">
-          <div class="badge" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M3 12h18"/><path d="M12 3v18"/><path d="M5 5l14 14"/><path d="M19 5L5 19"/></svg>
+      <article class="slide-page" id="slide-6" role="tabpanel" aria-labelledby="tab-6">
+        <div class="slide-copy">
+          <div class="kicker">Cierre</div>
+          <h2>
+            Mini actividad
+            <span class="gradient-word">de lectura</span>
+          </h2>
+          <p class="lead">
+            Usa la presentación como guía: identifica qué tipo de lectura necesitas según el objetivo del texto.
+          </p>
+          <div class="activity">
+            <div class="activity-card">
+              <strong>1. Elige un texto</strong>
+              <span>Puede ser cuento, noticia, página web, poema o artículo.</span>
+            </div>
+            <div class="activity-card">
+              <strong>2. Define el objetivo</strong>
+              <span>¿Quieres disfrutar, estudiar, buscar un dato o evaluar una opinión?</span>
+            </div>
+            <div class="activity-card">
+              <strong>3. Aplica una estrategia</strong>
+              <span>Subraya, infiere, verifica fuentes y explica tu conclusión.</span>
+            </div>
           </div>
-          <h3>Exploratoria</h3>
-          <p>Revisa rápido títulos, subtítulos e imágenes para ubicar información.</p>
-          <span class="chip">Útil para investigar</span>
-        </article>
-
-        <article class="type-card">
-          <div class="badge" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/><path d="M7 6v12"/><path d="M17 6v12"/></svg>
+        </div>
+        <div class="visual">
+          <div class="image-card">
+            <img class="slide-image" src="assets/slide-cierre.png" alt="Ilustración de un libro abriendo mundos de conocimiento" />
           </div>
-          <h3>Selectiva</h3>
-          <p>Busca datos concretos sin leer todo el texto de principio a fin.</p>
-          <span class="chip">Ejemplo: fechas o nombres</span>
-        </article>
-
-        <article class="type-card">
-          <div class="badge" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6"/><path d="M9 11h6"/><path d="M9 15h3"/></svg>
-          </div>
-          <h3>Digital</h3>
-          <p>Lee en pantallas y combina texto, enlaces, imágenes y recursos multimedia.</p>
-          <span class="chip">Clave: verificar fuentes</span>
-        </article>
-      </section>
+          <div class="quote">Leer es descubrir mundos, pensar mejor y transformar lo que sabemos.</div>
+        </div>
+      </article>
     </section>
 
-    <div class="closing">
-      <span>Leer es descubrir mundos, pensar mejor y transformar lo que sabemos.</span>
+    <div class="controls" aria-label="Controles de presentación">
+      <button class="nav-btn" id="prevBtn" type="button">Anterior</button>
+      <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+      <button class="nav-btn" id="nextBtn" type="button">Siguiente</button>
     </div>
   </main>
+
+  <script>
+    const tabs = Array.from(document.querySelectorAll(".tab"));
+    const slides = Array.from(document.querySelectorAll(".slide-page"));
+    const prevBtn = document.querySelector("#prevBtn");
+    const nextBtn = document.querySelector("#nextBtn");
+    const progressBar = document.querySelector("#progressBar");
+    let current = 0;
+
+    function showSlide(index) {
+      current = Math.max(0, Math.min(index, slides.length - 1));
+
+      slides.forEach((slide, i) => {
+        slide.classList.toggle("active", i === current);
+      });
+
+      tabs.forEach((tab, i) => {
+        tab.setAttribute("aria-selected", String(i === current));
+        tab.tabIndex = i === current ? 0 : -1;
+      });
+
+      prevBtn.disabled = current === 0;
+      nextBtn.disabled = current === slides.length - 1;
+      progressBar.style.width = `${((current + 1) / slides.length) * 100}%`;
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => showSlide(index));
+    });
+
+    prevBtn.addEventListener("click", () => showSlide(current - 1));
+    nextBtn.addEventListener("click", () => showSlide(current + 1));
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowRight") showSlide(current + 1);
+      if (event.key === "ArrowLeft") showSlide(current - 1);
+      if (event.key === "Home") showSlide(0);
+      if (event.key === "End") showSlide(slides.length - 1);
+    });
+
+    showSlide(0);
+  </script>
 </body>
 </html>
